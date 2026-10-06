@@ -1,0 +1,6 @@
+Flask
+gunicorn
+numpy
+ollama
+pymupdf
+sentence-transformers

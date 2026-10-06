@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DocQuery — AI Document Assistant</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+<div class="app-shell">
+
+    <!-- =========================================================
+         SIDEBAR
+         ========================================================= -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+            <div class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img">
+                    <path d="M6 3.5h8.6L19 7.9V20.5H6z"></path>
+                    <path d="M14 3.5v4.8h4.8"></path>
+                    <path d="M8.8 12.2h7M8.8 15.4h5"></path>
+                </svg>
+            </div>
+
+            <div class="brand-copy">
+                <div class="brand-name">DocQuery</div>
+                <div class="brand-subtitle">AI Document Assistant</div>
+            </div>
+        </div>
+
+        <button
+            class="new-session-btn"
+            id="newDocumentButton"
+            type="button"
+        >
+            <span class="new-session-icon">+</span>
+            <span>New session</span>
+        </button>
+
+        <div class="sidebar-section">
+            <div class="sidebar-label">DOCUMENTS</div>
+
+            <div
+                class="document-list"
+                id="documentInfo"
+                aria-live="polite"
+            >
+                <div class="document-empty">
+                    <div class="document-empty-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6 3.5h8.6L19 7.9V20.5H6z"></path>
+                            <path d="M14 3.5v4.8h4.8"></path>
+                        </svg>
+                    </div>
+                    <span>No documents uploaded</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-spacer"></div>
+
+        <div class="sidebar-footer">
+            <div class="runtime-card">
+                <div class="runtime-head">
+                    <span class="status-indicator"></span>
+                    <span>System ready</span>
+                </div>
+
+                <div class="runtime-meta">
+                    Local RAG · Ollama
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- =========================================================
+         MAIN
+         ========================================================= -->
+    <main class="main-content">
+
+        <header class="topbar">
+            <div class="topbar-left">
+                <button
+                    class="mobile-menu-btn"
+                    id="mobileMenuButton"
+                    type="button"
+                    aria-label="Open navigation"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <div>
+                    <div class="eyebrow">DOCUMENT INTELLIGENCE</div>
+                    <h1>Document Q&amp;A</h1>
+                    <p id="headerSubtitle">
+                        Upload PDFs and ask grounded questions about their contents.
+                    </p>
+                </div>
+            </div>
+
+            <div class="topbar-status">
+                <span class="status-indicator"></span>
+                <span>Ready</span>
+            </div>
+        </header>
+
+        <section class="workspace">
+
+            <!-- =================================================
+                 EMPTY / UPLOAD STATE
+                 ================================================= -->
+            <section
+                class="empty-state"
+                id="uploadCard"
+            >
+                <div class="empty-state-inner">
+
+                    <div class="hero-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6 3.5h8.6L19 7.9V20.5H6z"></path>
+                            <path d="M14 3.5v4.8h4.8"></path>
+                            <path d="M12 16V9.5"></path>
+                            <path d="m9.6 11.9 2.4-2.4 2.4 2.4"></path>
+                        </svg>
+                    </div>
+
+                    <div class="hero-kicker">PRIVATE · LOCAL · GROUNDED</div>
+
+                    <h2>Ask your documents anything.</h2>
+
+                    <p class="hero-description">
+                        Upload one or more PDFs and explore their contents
+                        with retrieval-grounded answers and source citations.
+                    </p>
+
+                    <label
+                        class="dropzone"
+                        id="dropzone"
+                        for="fileInput"
+                    >
+                        <span class="dropzone-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 16V8"></path>
+                                <path d="m9 11 3-3 3 3"></path>
+                                <path d="M5 17.5a3.5 3.5 0 0 0 0 7h14a3.5 3.5 0 0 0 0-7"></path>
+                                <path d="M5.8 17.5A7 7 0 0 1 19 14"></path>
+                            </svg>
+                        </span>
+
+                        <span class="dropzone-title">
+                            Drop PDF files here
+                        </span>
+
+                        <span class="dropzone-subtitle">
+                            or click to browse from your computer
+                        </span>
+
+                        <span class="dropzone-button">
+                            Choose PDFs
+                        </span>
+
+                        <input
+                            type="file"
+                            id="fileInput"
+                            accept=".pdf,application/pdf"
+                            multiple
+                        >
+                    </label>
+
+                    <div class="upload-note">
+                        PDF only · Maximum request size 50 MB
+                    </div>
+
+                    <div
+                        class="upload-status"
+                        id="uploadStatus"
+                        hidden
+                    ></div>
+                </div>
+            </section>
+
+            <!-- =================================================
+                 CHAT STATE
+                 ================================================= -->
+            <section
+                class="chat-workspace hidden"
+                id="chatContainer"
+            >
+
+                <div class="workspace-summary">
+                    <div>
+                        <div class="summary-kicker">CURRENT SESSION</div>
+                        <div class="summary-title" id="sessionTitle">
+                            Documents ready
+                        </div>
+                    </div>
+
+                    <div class="summary-stats" id="summaryStats">
+                        <span class="stat-pill">0 documents</span>
+                        <span class="stat-pill">0 pages</span>
+                        <span class="stat-pill">0 chunks</span>
+                    </div>
+                </div>
+
+                <div
+                    class="messages"
+                    id="messages"
+                    aria-live="polite"
+                >
+                    <div class="welcome-message">
+                        <div class="assistant-avatar">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M7 8.5a5 5 0 0 1 10 0v3.7a5 5 0 0 1-10 0z"></path>
+                                <path d="M5 12.5v-1a2 2 0 0 1 2-2M19 12.5v-1a2 2 0 0 0-2-2"></path>
+                                <path d="M9 18.5h6M10 21h4"></path>
+                            </svg>
+                        </div>
+
+                        <div class="message-body">
+                            <div class="message-author">DocQuery</div>
+                            <h3>Your documents are ready.</h3>
+                            <p>
+                                Ask about facts, tables, comparisons, or specific
+                                sections. Answers are grounded in the uploaded documents.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="composer-area">
+                    <form
+                        class="composer"
+                        id="questionForm"
+                    >
+                        <textarea
+                            id="questionInput"
+                            rows="1"
+                            placeholder="Ask a question about your documents…"
+                            autocomplete="off"
+                            spellcheck="true"
+                        ></textarea>
+
+                        <button
+                            id="askButton"
+                            class="send-button"
+                            type="submit"
+                            aria-label="Send question"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M4 12 20 4l-3 16-5-6z"></path>
+                                <path d="M12 14 20 4"></path>
+                            </svg>
+                        </button>
+                    </form>
+
+                    <div class="composer-footer">
+                        <span>
+                            Grounded answers · Source citations
+                        </span>
+                        <span>
+                            Enter to send · Shift + Enter for a new line
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+        </section>
+    </main>
+</div>
+
+<div
+    class="toast"
+    id="toast"
+    role="status"
+    aria-live="polite"
+    hidden
+></div>
+
+<script
+    src="{{ url_for('static', filename='js/app.js') }}"
+></script>
+</body>
+</html>
